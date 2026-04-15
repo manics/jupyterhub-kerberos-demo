@@ -1,0 +1,73 @@
+#
+
+services:
+  samba:
+    build:
+      context: ./samba
+    hostname: samba.example.org
+    domainname: example.org
+    privileged: true
+    volumes:
+      - samba-data:/samba
+      - hub-keytab:/keytabs/hub
+      - desktop-keytab:/keytabs/desktop
+    networks:
+      kerberos-net:
+        aliases:
+          - samba.example.org
+          - example.org
+
+  jupyterhub:
+    build:
+      context: .
+      dockerfile: jupyterhub/Dockerfile
+    hostname: hub.example.org
+    domainname: example.org
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - hub-keytab:/etc/jupyterhub:ro
+    environment:
+      - KRB5_CONFIG=/etc/krb5.conf
+      - KRB5_KTNAME=/etc/jupyterhub/HTTP.keytab
+    depends_on:
+      - samba
+    networks:
+      kerberos-net:
+        aliases:
+          - hub.example.org
+
+  desktop:
+    build:
+      context: .
+      dockerfile: desktop/Dockerfile
+    command:
+      - bash
+      - -c
+      - |
+        while [ ! -f /etc/desktop/jovyan.keytab ]; do sleep 2; done
+        kinit -k -t /etc/desktop/jovyan.keytab jovyan
+        exec start-tigervnc.sh
+    environment:
+      # No password needed to connect to VNC
+      PASSWORD: ""
+    hostname: desktop.example.org
+    domainname: example.org
+    ports:
+      - "127.0.0.1:5901:5901"
+    volumes:
+      - desktop-keytab:/etc/desktop:ro
+    depends_on:
+      - samba
+    networks:
+      kerberos-net:
+        aliases:
+          - desktop.example.org
+
+volumes:
+  samba-data:
+  hub-keytab:
+  desktop-keytab:
+
+networks:
+  kerberos-net:

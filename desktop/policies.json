@@ -1,0 +1,10 @@
+{
+  "policies": {
+    "Authentication": {
+      "SPNEGO": [".example.org"],
+      "AllowNonFQDN": {
+        "SPNEGO": true
+      }
+    }
+  }
+}

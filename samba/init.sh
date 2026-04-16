@@ -33,6 +33,9 @@ if [ ! -f "$SMB_CONF" ]; then
         "--dns-backend=SAMBA_INTERNAL"
         "--adminpass=Password123!"
         "--targetdir=/tmp/provision"
+        # Disable deprecated encryption types
+        "--option=kdc default domain supported enctypes = aes256-cts-hmac-sha1-96 aes128-cts-hmac-sha1-96"
+        "--option=kdc supported enctypes = aes256-cts-hmac-sha1-96 aes128-cts-hmac-sha1-96"
     )
 
     # Workaround for xattr restrictions: test if we can write to the security namespace

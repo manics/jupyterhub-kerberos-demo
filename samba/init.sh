@@ -76,7 +76,11 @@ if [ ! -f "$SMB_CONF" ]; then
     
     echo "Creating test user 'jovyan'..."
     samba-tool user create jovyan "Password123!" --use-username-as-cn
-    
+
+    echo "Creating group 'JupyterHub' and adding user 'jovyan'..."
+    samba-tool group create JupyterHub
+    samba-tool group addmembers JupyterHub jovyan
+
     echo "Creating service account for JupyterHub..."
     samba-tool user create hub-service "Password123!" --random-password
     samba-tool spn add HTTP/hub.example.org hub-service

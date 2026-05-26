@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y \
 RUN pip install --no-cache-dir \
     jupyterlab \
     pykerberos \
-    git+https://github.com/manics/kerberosauthenticator.git@dev
+    jupyterhub-kerberosauthenticator==1.0.0rc1
 
 # Copy configuration
 COPY jupyterhub/jupyterhub_config.py /srv/jupyterhub/jupyterhub_config.py

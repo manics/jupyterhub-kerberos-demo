@@ -3,10 +3,7 @@ import os
 c = get_config()
 
 # Configure Kerberos Authenticator
-# from kerberosauthenticator import KerberosAuthenticator
-from kerberosauthenticator import KerberosLocalAuthenticator
-
-c.JupyterHub.authenticator_class = KerberosLocalAuthenticator
+c.JupyterHub.authenticator_class = "local-kerberos"
 
 # For easy testing use local users inside the hub container instead of
 # spawning separate containers which requires mounting the docker socket

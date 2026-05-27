@@ -1,4 +1,5 @@
 #!/bin/bash
+# Format with: `shfmt -d -w -i 4 samba/init.sh`
 set -e
 
 # Path to smb.conf
@@ -6,10 +7,10 @@ SMB_CONF="/etc/samba/smb.conf"
 
 if [ ! -f "$SMB_CONF" ]; then
     echo "Samba not provisioned. Initializing..."
-    
+
     # Temporarily remove symlinks from the base image
     rm -rf /etc/samba /var/lib/samba /var/log/samba
-    
+
     echo "Provisioning domain EXAMPLE.ORG in /tmp/provision..."
     mkdir -p /tmp/provision
 
@@ -49,13 +50,13 @@ if [ ! -f "$SMB_CONF" ]; then
     rm -f /tmp/xattr_test
 
     samba-tool domain provision "${PROVISION_ARGS[@]}"
-    
+
     echo "Detailed structure of /tmp/provision:"
     find /tmp/provision -maxdepth 3
-    
+
     echo "Moving data to persistent /samba volume..."
     mkdir -p /samba/etc /samba/lib /samba/logs
-    
+
     # Map the output of targetdir to the expected locations
     # Targetdir usually has etc/samba/smb.conf
     if [ -d /tmp/provision/etc/samba ]; then
@@ -63,17 +64,17 @@ if [ ! -f "$SMB_CONF" ]; then
     elif [ -f /tmp/provision/etc/smb.conf ]; then
         cp -av /tmp/provision/etc/. /samba/etc/
     fi
-    
+
     # State and private
     [ -d /tmp/provision/state ] && cp -av /tmp/provision/state/. /samba/lib/
     [ -d /tmp/provision/private ] && cp -av /tmp/provision/private /samba/lib/
-    
+
     # Restore symlinks
     rm -rf /etc/samba /var/lib/samba /var/log/samba
     ln -s /samba/etc /etc/samba
     ln -s /samba/lib /var/lib/samba
     ln -s /samba/logs /var/log/samba
-    
+
     echo "Creating test user 'jovyan'..."
     samba-tool user create jovyan "Password123!" --use-username-as-cn
 
@@ -84,11 +85,11 @@ if [ ! -f "$SMB_CONF" ]; then
     echo "Creating service account for JupyterHub..."
     samba-tool user create hub-service "Password123!" --random-password
     samba-tool spn add HTTP/hub.example.org hub-service
-    
+
     echo "Exporting keytab to /keytabs/hub/HTTP.keytab..."
     samba-tool domain exportkeytab /keytabs/hub/HTTP.keytab --principal=HTTP/hub.example.org
     chmod 644 /keytabs/hub/HTTP.keytab
-    
+
     echo "Exporting keytab to /keytabs/desktop/jovyan.keytab..."
     samba-tool domain exportkeytab /keytabs/desktop/jovyan.keytab --principal=jovyan
     chmod 644 /keytabs/desktop/jovyan.keytab
